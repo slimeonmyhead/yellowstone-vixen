@@ -1,0 +1,294 @@
+syntax = "proto3";
+
+package vixen.parser;
+
+enum Side {
+  SIDE_UNSPECIFIED = 0; // Default zero value
+  SIDE_BUY = 1;
+  SIDE_SELL = 2;
+}
+
+// AccountsType enum from Rust
+enum AccountsType {
+  ACCOUNTS_TYPE_UNSPECIFIED = 0; // Default value
+  TRANSFER_HOOK_A = 1;
+  TRANSFER_HOOK_B = 2;
+}
+
+message RemainingAccountsSlice {
+  AccountsType accounts_type = 1;
+  uint32 length = 2;
+}
+
+
+message RemainingAccountsInfo {
+  repeated RemainingAccountsSlice slices = 1;
+}
+
+
+message Swap {
+  oneof swap_variant {
+    SaberVariant saber = 1;
+    SaberAddDecimalsDepositVariant saber_add_decimals_deposit = 2;
+    SaberAddDecimalsWithdrawVariant saber_add_decimals_withdraw = 3;
+    TokenSwapVariant token_swap = 4;
+    SenchaVariant sencha = 5;
+    StepVariant step = 6;
+    CropperVariant cropper = 7;
+    RaydiumVariant raydium = 8;
+    CremaVariant crema = 9;
+    LifinityVariant lifinity = 10;
+    MercurialVariant mercurial = 11;
+    CykuraVariant cykura = 12;
+    SerumVariant serum = 13;
+    MarinadeDepositVariant marinade_deposit = 14;
+    MarinadeUnstakeVariant marinade_unstake = 15;
+    AldrinVariant aldrin = 16;
+    AldrinV2Variant aldrin_v2 = 17;
+    WhirlpoolVariant whirlpool = 18;
+    InvariantVariant invariant = 19;
+    MeteoraVariant meteora = 20;
+    GooseFXVariant goose_fx = 21;
+    DeltaFiVariant delta_fi = 22;
+    BalansolVariant balansol = 23;
+    MarcoPoloVariant marco_polo = 24;
+    DradexVariant dradex = 25;
+    LifinityV2Variant lifinity_v2 = 26;
+    RaydiumClmmVariant raydium_clmm = 27;
+    OpenbookVariant openbook = 28;
+    PhoenixVariant phoenix = 29;
+    SymmetryVariant symmetry = 30;
+    TokenSwapV2Variant token_swap_v2 = 31;
+    HeliumTreasuryManagementRedeemV0Variant helium_treasury_management_redeem_v0 = 32;
+    StakeDexStakeWrappedSolVariant stake_dex_stake_wrapped_sol = 33;
+    StakeDexSwapViaStakeVariant stake_dex_swap_via_stake = 34;
+    GooseFXV2Variant goose_fx_v2 = 35;
+    PerpsVariant perps = 36;
+    PerpsAddLiquidityVariant perps_add_liquidity = 37;
+    PerpsRemoveLiquidityVariant perps_remove_liquidity = 38;
+    MeteoraDlmmVariant meteora_dlmm = 39;
+    OpenBookV2Variant open_book_v2 = 40;
+    RaydiumClmmV2Variant raydium_clmm_v2 = 41;
+    StakeDexPrefundWithdrawStakeAndDepositStakeVariant stake_dex_prefund_withdraw_stake_and_deposit_stake = 42;
+    CloneVariant clone = 43;
+    SanctumSVariant sanctum_s = 44;
+    SanctumSAddLiquidityVariant sanctum_s_add_liquidity = 45;
+    SanctumSRemoveLiquidityVariant sanctum_s_remove_liquidity = 46;
+    RaydiumCPVariant raydium_cp = 47;
+    WhirlpoolSwapV2Variant whirlpool_swap_v2 = 48;
+    OneIntroVariant one_intro = 49;
+    PumpdotfunWrappedBuyVariant pumpdotfun_wrapped_buy = 50;
+    PumpdotfunWrappedSellVariant pumpdotfun_wrapped_sell = 51;
+    PerpsV2Variant perps_v2 = 52;
+    PerpsV2AddLiquidityVariant perps_v2_add_liquidity = 53;
+    PerpsV2RemoveLiquidityVariant perps_v2_remove_liquidity = 54;
+    MoonshotWrappedBuyVariant moonshot_wrapped_buy = 55;
+    MoonshotWrappedSellVariant moonshot_wrapped_sell = 56;
+    StabbleStableSwapVariant stabble_stable_swap = 57;
+    StabbleWeightedSwapVariant stabble_weighted_swap = 58;
+    ObricVariant obric = 59;
+    FoxBuyFromEstimatedCostVariant fox_buy_from_estimated_cost = 60;
+    FoxClaimPartialVariant fox_claim_partial = 61;
+    SolFiVariant sol_fi = 62;
+  }
+}
+
+// For each Swap variant, we define a corresponding message.
+// Empty variants are represented by an empty message.
+message SaberVariant {}
+message SaberAddDecimalsDepositVariant {}
+message SaberAddDecimalsWithdrawVariant {}
+message TokenSwapVariant {}
+message SenchaVariant {}
+message StepVariant {}
+message CropperVariant {}
+message RaydiumVariant {}
+
+message CremaVariant {
+  bool a_to_b = 1;
+}
+
+message LifinityVariant {}
+message MercurialVariant {}
+message CykuraVariant {}
+
+message SerumVariant {
+  Side side = 1;
+}
+
+message MarinadeDepositVariant {}
+message MarinadeUnstakeVariant {}
+
+message AldrinVariant {
+  Side side = 1;
+}
+
+message AldrinV2Variant {
+  Side side = 1;
+}
+
+message WhirlpoolVariant {
+  bool a_to_b = 1;
+}
+
+message InvariantVariant {
+  bool x_to_y = 1;
+}
+
+message MeteoraVariant {}
+message GooseFXVariant {}
+
+message DeltaFiVariant {
+  bool stable = 1;
+}
+
+message BalansolVariant {}
+
+message MarcoPoloVariant {
+  bool x_to_y = 1;
+}
+
+message DradexVariant {
+  Side side = 1;
+}
+
+message LifinityV2Variant {}
+message RaydiumClmmVariant {}
+
+message OpenbookVariant {
+  Side side = 1;
+}
+
+message PhoenixVariant {
+  Side side = 1;
+}
+
+message SymmetryVariant {
+  uint64 from_token_id = 1;
+  uint64 to_token_id = 2;
+}
+
+message TokenSwapV2Variant {}
+message HeliumTreasuryManagementRedeemV0Variant {}
+message StakeDexStakeWrappedSolVariant {}
+
+message StakeDexSwapViaStakeVariant {
+  uint32 bridge_stake_seed = 1;
+}
+
+message GooseFXV2Variant {}
+message PerpsVariant {}
+message PerpsAddLiquidityVariant {}
+message PerpsRemoveLiquidityVariant {}
+message MeteoraDlmmVariant {}
+
+message OpenBookV2Variant {
+  Side side = 1;
+}
+
+message RaydiumClmmV2Variant {}
+
+message StakeDexPrefundWithdrawStakeAndDepositStakeVariant {
+  uint32 bridge_stake_seed = 1;
+}
+
+message CloneVariant {
+  // Rust’s u8 is represented here as a uint32.
+  uint32 pool_index = 1;
+  bool quantity_is_input = 2;
+  bool quantity_is_collateral = 3;
+}
+
+message SanctumSVariant {
+  uint32 src_lst_value_calc_accs = 1;
+  uint32 dst_lst_value_calc_accs = 2;
+  uint32 src_lst_index = 3;
+  uint32 dst_lst_index = 4;
+}
+
+message SanctumSAddLiquidityVariant {
+  uint32 lst_value_calc_accs = 1;
+  uint32 lst_index = 2;
+}
+
+message SanctumSRemoveLiquidityVariant {
+  uint32 lst_value_calc_accs = 1;
+  uint32 lst_index = 2;
+}
+
+message RaydiumCPVariant {}
+
+message WhirlpoolSwapV2Variant {
+  bool a_to_b = 1;
+  // The remaining_accounts_info field uses the message defined above.
+  RemainingAccountsInfo remaining_accounts_info = 2;
+}
+
+message OneIntroVariant {}
+message PumpdotfunWrappedBuyVariant {}
+message PumpdotfunWrappedSellVariant {}
+message PerpsV2Variant {}
+message PerpsV2AddLiquidityVariant {}
+message PerpsV2RemoveLiquidityVariant {}
+message MoonshotWrappedBuyVariant {}
+message MoonshotWrappedSellVariant {}
+message StabbleStableSwapVariant {}
+message StabbleWeightedSwapVariant {}
+
+message ObricVariant {
+  bool x_to_y = 1;
+}
+
+message FoxBuyFromEstimatedCostVariant {}
+
+message FoxClaimPartialVariant {
+  bool is_y = 1;
+}
+
+message SolFiVariant {
+  bool is_quote_to_base = 1;
+}
+
+message TokenLedgerProto {
+    bytes discriminator = 1;
+    string token_account = 2;
+    uint64 amount = 3;
+}
+
+message JupiterRouteAccountsProto {
+    string token_program = 1;
+    string user_transfer_authority = 2;
+    string user_source_token_account = 3;
+    string user_destination_token_account = 4;
+    string destination_token_account = 5;
+    string destination_mint = 6;
+    string platform_fee_account = 7;
+}
+
+message JupiterRouteIxDataProto {
+    repeated JupiterRoutePlanStepProto route_plan = 1;
+    uint64 in_amount = 2;
+    uint64 quoted_out_amount = 3;
+    uint64 slippage_bps = 4;
+    uint64 platform_fee_bps = 5;
+}
+
+message JupiterRoutePlanStepProto {
+    string swap = 1;
+    uint64 percent = 2;
+    uint64 input_index = 3;
+    uint64 output_index = 4;
+}
+
+message JupiterRouteInstructionProto {
+    JupiterRouteAccountsProto accounts = 1;
+    JupiterRouteIxDataProto data = 2;
+}
+
+message JupiterSwapEventProto {
+    string amm = 1;
+    string input_mint = 2;
+    uint64 input_amount = 3;
+    string output_mint = 4;
+    uint64 output_amount = 5;
+}

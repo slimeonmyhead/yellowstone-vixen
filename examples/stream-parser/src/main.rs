@@ -13,6 +13,10 @@ use clap::Parser as _;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use yellowstone_vixen::{self as vixen, proto::parser, vixen_core::proto::Proto};
 use yellowstone_vixen_parser::{
+    jupiter::{
+        AccountParser as JupiterAccParser, InstructionParser as JupiterIxParser,
+        TransactionParser as JupiterProgramTxParser,
+    },
     orca::{AccountParser as OrcaAccParser, InstructionParser as OrcaIxParser},
     raydium::{AccountParser as RaydiumAccParser, InstructionParser as RaydiumIxParser},
     token_extension_program::{
@@ -22,6 +26,7 @@ use yellowstone_vixen_parser::{
     token_program::{
         AccountParser as TokenProgramAccParser, InstructionParser as TokenProgramIxParser,
     },
+    transaction::TransactionParser,
 };
 
 #[derive(clap::Parser)]
@@ -41,16 +46,21 @@ fn main() {
     let config = std::fs::read_to_string(config).expect("Error reading config file");
     let config = toml::from_str(&config).expect("Error parsing config");
 
+    let transaction_parser = TransactionParser::builder()
+        .instruction(RaydiumIxParser)
+        .instruction(JupiterIxParser)
+        .instruction(TokenProgramIxParser)
+        .instruction(TokenExtensionProgramIxParser)
+        .instruction(OrcaIxParser)
+        .build();
     vixen::stream::Server::builder()
         .descriptor_set(parser::DESCRIPTOR_SET)
         .account(Proto::new(TokenExtensionProgramAccParser))
         .account(Proto::new(TokenProgramAccParser))
-        .account(Proto::new(OrcaAccParser))
+        // .account(Proto::new(OrcaAccParser))
         .account(Proto::new(RaydiumAccParser))
-        .instruction(Proto::new(TokenProgramIxParser))
-        .instruction(Proto::new(TokenExtensionProgramIxParser))
-        .instruction(Proto::new(OrcaIxParser))
-        .instruction(Proto::new(RaydiumIxParser))
+        .account(Proto::new(JupiterAccParser))
+        .transaction(Proto::new(transaction_parser))
         .build(config)
         .run();
 }

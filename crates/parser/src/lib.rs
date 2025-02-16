@@ -15,6 +15,8 @@ pub use error::*;
 
 mod helpers;
 
+#[cfg(feature = "jupiter")]
+pub mod jupiter;
 #[cfg(feature = "orca")]
 pub mod orca;
 #[cfg(feature = "raydium")]
@@ -23,6 +25,8 @@ pub mod raydium;
 pub mod token_extension_program;
 #[cfg(feature = "token-program")]
 pub mod token_program;
+
+pub mod transaction;
 
 mod error {
     use std::{borrow::Cow, error::Error as StdError};

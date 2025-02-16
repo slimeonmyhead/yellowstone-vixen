@@ -1,12 +1,14 @@
 syntax = "proto3";
 
 package vixen.parser;
+import "google/protobuf/any.proto";
 
 import "solana-token/accounts.proto";
 import "solana-token/ixs.proto";
 import "solana-token/extensions.proto";
 import "orca.proto";
 import "raydium.proto";
+import "jupiter.proto";
 
 
 /// Token Program
@@ -132,4 +134,42 @@ message RaydiumProgramIxProto {
       RaydiumSwapInstructionProto swap = 1;
       RaydiumSwapV2InstructionProto swap_v2 = 2;
     }
+}
+
+// Jupiter Program State
+message JupiterProgramStateProto{
+  oneof state_oneof {
+    TokenLedgerProto token_ledger = 1;
+  }
+}
+
+// Jupiter Program Instructions
+message JupiterProgramIxProto {
+    oneof ix_oneof {
+      JupiterRouteInstructionProto route = 1;
+      JupiterSwapEventProto swap_event = 2;
+    }
+}
+
+// Jupiter Program Transactions
+message JupiterProgramTxProto {
+  uint64 slot = 1;
+  string signature = 2;
+  repeated JupiterProgramIxProto instructions = 3;
+}
+
+message InstructionProto {
+  oneof ix_oneof {
+    JupiterProgramIxProto jupiter_program_ix = 1;
+    RaydiumProgramIxProto raydium_program_ix = 2;
+    OrcaProgramIxProto orca_program_ix = 3;
+    TokenProgramIxProto token_program_ix = 4;
+    TokenExtensionProgramIxProto token_extension_program_ix = 5;
+  }
+}
+
+message TransactionOutputProto {
+  uint64 slot = 1;
+  string signature = 2;
+  repeated InstructionProto instructions = 3;
 }
