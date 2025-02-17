@@ -144,6 +144,7 @@ impl TransactionParserBuilder {
 pub struct TransactionOutput {
     pub slot: u64,
     pub signature: Vec<u8>,
+    pub signer: Pubkey,
     pub timestamp: i64,
     pub instructions: Vec<Box<TransactionInstruction>>,
     pub pre_balances: Vec<u64>,
@@ -194,50 +195,47 @@ impl yellowstone_vixen_core::Parser for TransactionParser {
             }
         }
 
+        let accounts = tx_update
+            .transaction
+            .as_ref()
+            .unwrap()
+            .transaction
+            .as_ref()
+            .unwrap()
+            .message
+            .as_ref()
+            .unwrap()
+            .account_keys
+            .clone();
+
+        let meta = tx_update
+            .transaction
+            .as_ref()
+            .unwrap()
+            .meta
+            .as_ref()
+            .unwrap();
+
         Ok(TransactionOutput {
             slot: tx_update.slot,
             signature: tx_update.transaction.as_ref().unwrap().signature.clone(),
+            signer: Pubkey::new_from_array(
+                accounts
+                    .get(0)
+                    .unwrap()
+                    .as_slice()
+                    .try_into()
+                    .unwrap_or([0; 32]),
+            ),
             timestamp: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
                 .as_secs() as i64,
             instructions,
-            pre_balances: tx_update
-                .transaction
-                .as_ref()
-                .unwrap()
-                .meta
-                .as_ref()
-                .unwrap()
-                .post_balances
-                .clone(),
-            post_balances: tx_update
-                .transaction
-                .as_ref()
-                .unwrap()
-                .meta
-                .as_ref()
-                .unwrap()
-                .pre_balances
-                .clone(),
-            pre_token_balances: tx_update
-                .transaction
-                .as_ref()
-                .unwrap()
-                .meta
-                .as_ref()
-                .unwrap()
-                .pre_token_balances
-                .clone(),
-            post_token_balances: tx_update
-                .transaction
-                .as_ref()
-                .unwrap()
-                .meta
-                .as_ref()
-                .unwrap()
-                .post_token_balances
-                .clone(),
+            pre_balances: meta.post_balances.clone(),
+            post_balances: meta.pre_balances.clone(),
+            pre_token_balances: meta.pre_token_balances.clone(),
+            post_token_balances: meta.post_token_balances.clone(),
         })
     }
 }
@@ -265,6 +263,7 @@ mod proto_parser {
             TransactionOutputProto {
                 slot: self.slot,
                 signature: bs58::encode(&self.signature).into_string(),
+                signer: bs58::encode(&self.signer).into_string(),
                 timestamp: self.timestamp,
                 instructions: self
                     .instructions
