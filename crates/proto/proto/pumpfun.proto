@@ -27,6 +27,31 @@ message PumpfunBuyInstructionProto {
     PumpfunBuyIxDataProto data = 2;
 }
 
+message PumpfunSellAccountsProto {
+    string global = 1;
+    string fee_recipient = 2;
+    string mint = 3;
+    string bonding_curve = 5;
+    string associated_bonding_curve = 6;
+    string associated_user = 7;
+    string user = 8;
+    string system_program = 9;
+    string associated_token_program = 10;
+    string token_program = 11;
+    string event_authority = 12;
+    string program = 13;
+}
+
+message PumpfunSellIxDataProto {
+    uint64 amount = 1;
+    uint64 min_sol_output = 2;
+}
+
+message PumpfunSellInstructionProto {
+    PumpfunSellAccountsProto accounts = 1;
+    PumpfunSellIxDataProto data = 2;
+}
+
 message PumpfunTradeEventProto {
     string mint = 1;
     uint64 sol_amount = 2;

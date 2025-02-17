@@ -227,11 +227,13 @@ mod proto_parser {
     use yellowstone_vixen_proto::parser::{
         pumpfun_program_ix_proto::IxOneof, PumpfunBuyAccountsProto, PumpfunBuyInstructionProto,
         PumpfunBuyIxDataProto, PumpfunCreateEventProto, PumpfunProgramIxProto,
+        PumpfunSellAccountsProto, PumpfunSellInstructionProto, PumpfunSellIxDataProto,
         PumpfunTradeEventProto,
     };
 
     use super::{
-        BuyIxAccounts, BuyIxData, CreateEvent, InstructionParser, PumpfunProgramIx, TradeEvent,
+        BuyIxAccounts, BuyIxData, CreateEvent, InstructionParser, PumpfunProgramIx, SellIxAccounts,
+        SellIxData, TradeEvent,
     };
     use crate::helpers::IntoProto;
 
@@ -299,11 +301,45 @@ mod proto_parser {
         }
     }
 
+    impl IntoProto<PumpfunSellAccountsProto> for SellIxAccounts {
+        fn into_proto(self) -> PumpfunSellAccountsProto {
+            PumpfunSellAccountsProto {
+                global: self.global.to_string(),
+                fee_recipient: self.fee_recipient.to_string(),
+                mint: self.mint.to_string(),
+                bonding_curve: self.bonding_curve.to_string(),
+                associated_bonding_curve: self.associated_bonding_curve.to_string(),
+                associated_user: self.associated_user.to_string(),
+                user: self.user.to_string(),
+                system_program: self.system_program.to_string(),
+                associated_token_program: self.associated_token_program.to_string(),
+                token_program: self.token_program.to_string(),
+                event_authority: self.event_authority.to_string(),
+                program: self.program.to_string(),
+            }
+        }
+    }
+
+    impl IntoProto<PumpfunSellIxDataProto> for SellIxData {
+        fn into_proto(self) -> PumpfunSellIxDataProto {
+            PumpfunSellIxDataProto {
+                amount: self.amount,
+                min_sol_output: self.min_sol_output,
+            }
+        }
+    }
+
     impl IntoProto<PumpfunProgramIxProto> for PumpfunProgramIx {
         fn into_proto(self) -> PumpfunProgramIxProto {
             match self {
                 PumpfunProgramIx::Buy(accounts, data) => PumpfunProgramIxProto {
                     ix_oneof: Some(IxOneof::Buy(PumpfunBuyInstructionProto {
+                        accounts: Some(accounts.into_proto()),
+                        data: Some(data.into_proto()),
+                    })),
+                },
+                PumpfunProgramIx::Sell(accounts, data) => PumpfunProgramIxProto {
+                    ix_oneof: Some(IxOneof::Sell(PumpfunSellInstructionProto {
                         accounts: Some(accounts.into_proto()),
                         data: Some(data.into_proto()),
                     })),
