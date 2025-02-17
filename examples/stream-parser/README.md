@@ -30,9 +30,6 @@ grpcurl -plaintext 127.0.0.1:3030 describe vixen.stream.ProgramStreams.Subscribe
 To subcribe to the stream and receive parsed accounts and ixs, execute the following command
 
 ```bash
-# Subscribing to Token extension program stream (replace this pubkey with the desired program pubkey that is supported by vixen)
-grpcurl -plaintext -d '{"program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"}' 127.0.0.1:3030 vixen.stream.ProgramStreams/Subscribe
+# Subscribing to transaction stream
+grpcurl -plaintext -d '{"program": "Transaction11111111111111111111111111111111"}' 127.0.0.1:3030 vixen.stream.ProgramStreams/Subscribe
 ```
-
-This example is using Token extensions program to parse Account updates.
-replace this with other program pubkeys that are supported by vixen.

@@ -157,7 +157,7 @@ pub const EXCLUDED_PROGRAM_IDS: &[Pubkey] = &[
     pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
     pubkey!("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"),
 ];
-pub const ID: Pubkey = pubkey!("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8");
+pub const ID: Pubkey = pubkey!("Transaction11111111111111111111111111111111");
 
 impl yellowstone_vixen_core::Parser for TransactionParser {
     type Input = yellowstone_vixen_core::TransactionUpdate;
