@@ -9,6 +9,7 @@ import "solana-token/extensions.proto";
 import "orca.proto";
 import "raydium.proto";
 import "jupiter.proto";
+import "raydium_amm.proto";
 
 
 /// Token Program
@@ -136,8 +137,22 @@ message RaydiumProgramIxProto {
     }
 }
 
+// Raydium Amm Program Instructions
+message RaydiumAmmProgramIxProto {
+  oneof ix_oneof {
+    RaydiumAmmSwapBaseInInstructionProto swapBaseIn = 1;
+  }
+}
+
+// Raydium Amm Program State
+message RaydiumAmmProgramStateProto {
+  oneof state_oneof {
+    TargetOrdersProto target_orders = 1;
+  }
+}
+
 // Jupiter Program State
-message JupiterProgramStateProto{
+message JupiterProgramStateProto {
   oneof state_oneof {
     TokenLedgerProto token_ledger = 1;
   }
@@ -165,6 +180,7 @@ message InstructionProto {
     OrcaProgramIxProto orca_program_ix = 3;
     TokenProgramIxProto token_program_ix = 4;
     TokenExtensionProgramIxProto token_extension_program_ix = 5;
+    RaydiumAmmProgramIxProto raydium_amm_program_ix = 6;
   }
 }
 

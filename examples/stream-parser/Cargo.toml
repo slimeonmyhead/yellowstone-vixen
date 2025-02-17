@@ -18,7 +18,8 @@ yellowstone-vixen-parser = { workspace = true, features = [
   "token-program",
   "orca",
   "raydium",
-  "jupiter"
+  "jupiter",
+  "raydium_amm"
 ] }
 
 [build-dependencies]

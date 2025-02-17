@@ -21,6 +21,8 @@ pub mod jupiter;
 pub mod orca;
 #[cfg(feature = "raydium")]
 pub mod raydium;
+#[cfg(feature = "raydium_amm")]
+pub mod raydium_amm;
 #[cfg(feature = "token-extensions")]
 pub mod token_extension_program;
 #[cfg(feature = "token-program")]

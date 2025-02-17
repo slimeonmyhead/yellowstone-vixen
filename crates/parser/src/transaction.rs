@@ -1,6 +1,7 @@
 use crate::jupiter::JupiterProgramIx;
 use crate::orca::OrcaProgramIx;
 use crate::raydium::RaydiumProgramIx;
+use crate::raydium_amm::RaydiumAmmProgramIx;
 use crate::token_extension_program::TokenExtensionProgramIx;
 use crate::token_program::TokenProgramIx;
 use solana_program::{pubkey, pubkey::Pubkey};
@@ -49,6 +50,7 @@ define_instruction_variants!(
         TokenExtensionProgramIx
     ),
     (Orca, OrcaProgramIx, OrcaProgramIx),
+    (RaydiumAmm, RaydiumAmmProgramIx, RaydiumAmmProgramIx),
 );
 
 pub trait InstructionParser: Send + Sync + std::fmt::Debug {
@@ -131,7 +133,7 @@ pub struct TransactionOutput {
     pub instructions: Vec<Box<TransactionInstruction>>,
 }
 
-pub const ID: Pubkey = pubkey!("JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4");
+pub const ID: Pubkey = pubkey!("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8");
 
 impl yellowstone_vixen_core::Parser for TransactionParser {
     type Input = yellowstone_vixen_core::TransactionUpdate;

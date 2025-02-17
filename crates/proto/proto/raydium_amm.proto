@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package vixen.parser;
+
+message RaydiumAmmSwapBaseInAccountsProto {
+    string token_program = 1;
+    string amm = 2;
+    string amm_authority = 3;
+    string amm_open_orders = 4;
+    string amm_target_orders = 5;
+    string pool_coin_token_account = 6;
+    string pool_pc_token_account = 7;
+    string serum_program = 8;
+    string serum_market = 9;
+    string serum_bids = 10;
+    string serum_asks = 11;
+    string serum_event_queue = 12;
+    string serum_coin_vault_account = 13;
+    string serum_pc_vault_account = 14;
+    string serum_vault_signer = 15;
+    string user_source_token_account = 16;
+    string user_destination_token_account = 17;
+    string user_source_owner = 18;
+}
+
+message RaydiumAmmSwapBaseInIxDataProto {
+    uint64 amount_in = 1;
+    uint64 minimum_amount_out = 2;
+}
+
+
+message RaydiumAmmSwapBaseInInstructionProto {
+    RaydiumAmmSwapBaseInAccountsProto accounts = 1;
+    RaydiumAmmSwapBaseInIxDataProto data = 2;
+}
+
+
+message TargetOrdersProto {
+    bytes discriminator = 1;
+    repeated uint64 owner = 2;
+    repeated TargetOrderProto buy_orders = 3;
+    repeated uint64 padding1 = 4;
+    string target_x = 5;
+    string target_y = 6;
+    string plan_x_buy = 7;
+    string plan_y_buy = 8;
+    string plan_x_sell = 9;
+    string plan_y_sell = 10;
+    string placed_x = 11;
+    string placed_y = 12;
+    string calc_pnl_x = 13;
+    string calc_pnl_y = 14;
+    repeated TargetOrderProto sell_orders = 15;
+    repeated uint64 padding2 = 16;
+    repeated uint64 replace_buy_client_id = 17;
+    repeated uint64 replace_sell_client_id = 18;
+    uint64 last_order_numerator = 19;
+    uint64 last_order_denominator = 20;
+    uint64 plan_orders_cur = 21;
+    uint64 place_orders_cur = 22;
+    uint64 valid_buy_order_num = 23;
+    uint64 valid_sell_order_num = 24;
+    repeated uint64 padding3 = 25;
+    string free_slot_bits = 26;
+}
+
+message TargetOrderProto {
+    string price = 1;
+    string vol = 2;
+}

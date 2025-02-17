@@ -408,8 +408,7 @@ pub fn check_min_accounts_req(
 
 #[cfg(feature = "proto")]
 mod proto_parser {
-    use jupiter_program_sdk::types::RoutePlanStep;
-    use solana_program::pubkey::Pubkey;
+    use jupiter_program_sdk::{types::RoutePlanStep, ID};
     use yellowstone_vixen_core::proto::ParseProto;
     use yellowstone_vixen_proto::parser::{
         jupiter_program_ix_proto::IxOneof, JupiterProgramIxProto, JupiterProgramTxProto,
@@ -430,15 +429,9 @@ mod proto_parser {
                 user_transfer_authority: self.user_transfer_authority.to_string(),
                 user_source_token_account: self.user_source_token_account.to_string(),
                 user_destination_token_account: self.user_destination_token_account.to_string(),
-                destination_token_account: self
-                    .destination_token_account
-                    .unwrap_or(Pubkey::new_from_array([0; 32]))
-                    .to_string(),
+                destination_token_account: self.destination_token_account.unwrap_or(ID).to_string(),
                 destination_mint: self.destination_mint.to_string(),
-                platform_fee_account: self
-                    .platform_fee_account
-                    .unwrap_or(Pubkey::new_from_array([0; 32]))
-                    .to_string(),
+                platform_fee_account: self.platform_fee_account.unwrap_or(ID).to_string(),
             }
         }
     }

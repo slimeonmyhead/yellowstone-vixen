@@ -19,6 +19,7 @@ use yellowstone_vixen_parser::{
     },
     orca::{AccountParser as OrcaAccParser, InstructionParser as OrcaIxParser},
     raydium::{AccountParser as RaydiumAccParser, InstructionParser as RaydiumIxParser},
+    raydium_amm::{AccountParser as RaydiumAmmAccParser, InstructionParser as RaydiumAmmIxParser},
     token_extension_program::{
         AccountParser as TokenExtensionProgramAccParser,
         InstructionParser as TokenExtensionProgramIxParser,
@@ -52,14 +53,17 @@ fn main() {
         .instruction(TokenProgramIxParser)
         .instruction(TokenExtensionProgramIxParser)
         .instruction(OrcaIxParser)
+        .instruction(RaydiumAmmIxParser)
         .build();
     vixen::stream::Server::builder()
         .descriptor_set(parser::DESCRIPTOR_SET)
-        .account(Proto::new(TokenExtensionProgramAccParser))
-        .account(Proto::new(TokenProgramAccParser))
+        // .account(Proto::new(TokenExtensionProgramAccParser))
+        // .account(Proto::new(TokenProgramAccParser))
         // .account(Proto::new(OrcaAccParser))
-        .account(Proto::new(RaydiumAccParser))
-        .account(Proto::new(JupiterAccParser))
+        // .account(Proto::new(RaydiumAccParser))
+        // .account(Proto::new(JupiterAccParser))
+        //.instruction(Proto::new(RaydiumIxParser))
+        //.account(Proto::new(RaydiumAmmAccParser))
         .transaction(Proto::new(transaction_parser))
         .build(config)
         .run();

@@ -8,25 +8,24 @@
 use jupiter_program_sdk::accounts::TokenLedger;
 use jupiter_program_sdk::ID;
 
-
 /// Jupiter Program State
 #[allow(clippy::large_enum_variant)]
 #[derive(Debug)]
 pub enum JupiterProgramState {
-            TokenLedger(TokenLedger),
-    }
+    TokenLedger(TokenLedger),
+}
 
 impl JupiterProgramState {
-    pub fn try_unpack(data_bytes:&[u8]) -> yellowstone_vixen_core::ParseResult<Self>{
-        let data_len = data_bytes.len();    
-                                    const TOKENLEDGER_LEN:usize = std::mem::size_of::<TokenLedger>();
-                            match data_len {
-                                    TOKENLEDGER_LEN => Ok(
-                    JupiterProgramState::TokenLedger(
-                        TokenLedger::from_bytes(data_bytes)?
-                    )
-                    ),
-                            _ => Err(yellowstone_vixen_core::ParseError::from("Invalid Account data length".to_owned())),
+    pub fn try_unpack(data_bytes: &[u8]) -> yellowstone_vixen_core::ParseResult<Self> {
+        let data_len = data_bytes.len();
+        const TOKENLEDGER_LEN: usize = std::mem::size_of::<TokenLedger>();
+        match data_len {
+            TOKENLEDGER_LEN => Ok(JupiterProgramState::TokenLedger(TokenLedger::from_bytes(
+                data_bytes,
+            )?)),
+            _ => Err(yellowstone_vixen_core::ParseError::from(
+                "Invalid Account data length".to_owned(),
+            )),
         }
     }
 }
@@ -53,8 +52,11 @@ impl yellowstone_vixen_core::Parser for AccountParser {
         &self,
         acct: &yellowstone_vixen_core::AccountUpdate,
     ) -> yellowstone_vixen_core::ParseResult<Self::Output> {
-        let inner = acct.account.as_ref().ok_or(solana_program::program_error::ProgramError::InvalidArgument)?;
-           JupiterProgramState::try_unpack(&inner.data)
+        let inner = acct
+            .account
+            .as_ref()
+            .ok_or(solana_program::program_error::ProgramError::InvalidArgument)?;
+        JupiterProgramState::try_unpack(&inner.data)
     }
 }
 
@@ -72,9 +74,7 @@ mod proto_parser {
         jupiter_program_state_proto, JupiterProgramStateProto, TokenLedgerProto,
     };
 
-    use super::{
-        AccountParser, JupiterProgramState, TokenLedger
-    };
+    use super::{AccountParser, JupiterProgramState, TokenLedger};
     use crate::helpers::IntoProto;
 
     impl IntoProto<TokenLedgerProto> for TokenLedger {

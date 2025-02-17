@@ -21,6 +21,7 @@ yellowstone-vixen-proto = { workspace = true, features = [
     "parser",
 ], optional = true }
 jupiter-program-sdk = { path = "../jupiter-program-sdk" }
+raydium-amm-program-sdk = { path = "../raydium-amm-program-sdk" }
 thiserror = "1.0.64"
 borsh = "^0.10"
 borsh-derive = "^0.10"
@@ -55,3 +56,4 @@ orca = [
 ]
 raydium = []
 jupiter = []
+raydium_amm = []
