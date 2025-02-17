@@ -144,6 +144,7 @@ impl TransactionParserBuilder {
 pub struct TransactionOutput {
     pub slot: u64,
     pub signature: Vec<u8>,
+    pub timestamp: i64,
     pub instructions: Vec<Box<TransactionInstruction>>,
     pub pre_balances: Vec<u64>,
     pub post_balances: Vec<u64>,
@@ -196,6 +197,10 @@ impl yellowstone_vixen_core::Parser for TransactionParser {
         Ok(TransactionOutput {
             slot: tx_update.slot,
             signature: tx_update.transaction.as_ref().unwrap().signature.clone(),
+            timestamp: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs() as i64,
             instructions,
             pre_balances: tx_update
                 .transaction
@@ -260,6 +265,7 @@ mod proto_parser {
             TransactionOutputProto {
                 slot: self.slot,
                 signature: bs58::encode(&self.signature).into_string(),
+                timestamp: self.timestamp,
                 instructions: self
                     .instructions
                     .into_iter()
