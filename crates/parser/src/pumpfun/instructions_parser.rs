@@ -292,7 +292,7 @@ mod proto_parser {
                 mint: self.mint.to_string(),
                 sol_amount: self.sol_amount,
                 token_amount: self.token_amount,
-                is_buy: true,
+                is_buy: self.is_buy,
                 user: self.user.to_string(),
                 timestamp: self.timestamp,
                 virtual_sol_reserves: self.virtual_sol_reserves,
