@@ -12,6 +12,7 @@ use pumpfun_program_sdk::instructions::{
     Sell as SellIxAccounts, SellInstructionArgs as SellIxData, SetParams as SetParamsIxAccounts,
     SetParamsInstructionArgs as SetParamsIxData, Withdraw as WithdrawIxAccounts,
 };
+use pumpfun_program_sdk::types::{CompleteEvent, CreateEvent, SetParamsEvent, TradeEvent};
 use pumpfun_program_sdk::ID;
 
 use solana_program::pubkey::Pubkey;
@@ -25,6 +26,10 @@ pub enum PumpfunProgramIx {
     Buy(BuyIxAccounts, BuyIxData),
     Sell(SellIxAccounts, SellIxData),
     Withdraw(WithdrawIxAccounts),
+    TradeEvent(TradeEvent),
+    CreateEvent(CreateEvent),
+    CompleteEvent(CompleteEvent),
+    SetParamsEvent(SetParamsEvent),
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -169,6 +174,32 @@ impl InstructionParser {
                 };
                 Ok(PumpfunProgramIx::Withdraw(ix_accounts))
             },
+            [228, 69, 165, 46, 81, 203, 154, 29] => {
+                let event_descriminator: [u8; 8] = ix.data[8..16].try_into()?;
+                let mut event_data = &ix.data[16..];
+                match event_descriminator {
+                    [27, 114, 169, 77, 222, 235, 99, 118] => {
+                        let de_ix_data: CreateEvent =
+                            BorshDeserialize::deserialize(&mut event_data)?;
+                        Ok(PumpfunProgramIx::CreateEvent(de_ix_data))
+                    },
+                    [189, 219, 127, 211, 78, 230, 97, 238] => {
+                        let de_ix_data: TradeEvent =
+                            BorshDeserialize::deserialize(&mut event_data)?;
+                        Ok(PumpfunProgramIx::TradeEvent(de_ix_data))
+                    },
+                    _ => {
+                        // println!(
+                        //     "Transaction signature: {:?}",
+                        //     bs58::encode(ix.shared.signature.clone()).into_string(),
+                        // );
+                        // println!("Event discriminator: {:?}", event_descriminator);
+                        Err(yellowstone_vixen_core::ParseError::from(
+                            "Invalid Instruction discriminator".to_owned(),
+                        ))
+                    },
+                }
+            },
             _ => Err(yellowstone_vixen_core::ParseError::from(
                 "Invalid Instruction discriminator".to_owned(),
             )),
@@ -195,10 +226,13 @@ mod proto_parser {
     use yellowstone_vixen_core::proto::ParseProto;
     use yellowstone_vixen_proto::parser::{
         pumpfun_program_ix_proto::IxOneof, PumpfunBuyAccountsProto, PumpfunBuyInstructionProto,
-        PumpfunBuyIxDataProto, PumpfunProgramIxProto,
+        PumpfunBuyIxDataProto, PumpfunCreateEventProto, PumpfunProgramIxProto,
+        PumpfunTradeEventProto,
     };
 
-    use super::{BuyIxAccounts, BuyIxData, InstructionParser, PumpfunProgramIx};
+    use super::{
+        BuyIxAccounts, BuyIxData, CreateEvent, InstructionParser, PumpfunProgramIx, TradeEvent,
+    };
     use crate::helpers::IntoProto;
 
     impl ParseProto for InstructionParser {
@@ -237,6 +271,34 @@ mod proto_parser {
         }
     }
 
+    impl IntoProto<PumpfunCreateEventProto> for CreateEvent {
+        fn into_proto(self) -> PumpfunCreateEventProto {
+            PumpfunCreateEventProto {
+                name: self.name,
+                symbol: self.symbol,
+                uri: self.uri,
+                mint: self.mint.to_string(),
+                bonding_curve: self.bonding_curve.to_string(),
+                user: self.user.to_string(),
+            }
+        }
+    }
+
+    impl IntoProto<PumpfunTradeEventProto> for TradeEvent {
+        fn into_proto(self) -> PumpfunTradeEventProto {
+            PumpfunTradeEventProto {
+                mint: self.mint.to_string(),
+                sol_amount: self.sol_amount,
+                token_amount: self.token_amount,
+                is_buy: true,
+                user: self.user.to_string(),
+                timestamp: self.timestamp,
+                virtual_sol_reserves: self.virtual_sol_reserves,
+                virtual_token_reserves: self.virtual_token_reserves,
+            }
+        }
+    }
+
     impl IntoProto<PumpfunProgramIxProto> for PumpfunProgramIx {
         fn into_proto(self) -> PumpfunProgramIxProto {
             match self {
@@ -245,6 +307,12 @@ mod proto_parser {
                         accounts: Some(accounts.into_proto()),
                         data: Some(data.into_proto()),
                     })),
+                },
+                PumpfunProgramIx::CreateEvent(data) => PumpfunProgramIxProto {
+                    ix_oneof: Some(IxOneof::CreateEvent(data.into_proto())),
+                },
+                PumpfunProgramIx::TradeEvent(data) => PumpfunProgramIxProto {
+                    ix_oneof: Some(IxOneof::TradeEvent(data.into_proto())),
                 },
                 //Ingore others
                 _ => PumpfunProgramIxProto { ix_oneof: None },

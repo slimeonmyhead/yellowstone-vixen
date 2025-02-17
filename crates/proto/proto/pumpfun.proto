@@ -26,3 +26,23 @@ message PumpfunBuyInstructionProto {
     PumpfunBuyAccountsProto accounts = 1;
     PumpfunBuyIxDataProto data = 2;
 }
+
+message PumpfunTradeEventProto {
+    string mint = 1;
+    uint64 sol_amount = 2;
+    uint64 token_amount = 3;
+    bool is_buy = 4;
+    string user = 5;
+    int64 timestamp = 6;
+    uint64 virtual_sol_reserves = 7;
+    uint64 virtual_token_reserves = 8;
+}
+
+message PumpfunCreateEventProto {
+    string name = 1;
+    string symbol = 2;
+    string uri = 3;
+    string mint = 4;
+    string bonding_curve = 5;
+    string user = 6;
+}

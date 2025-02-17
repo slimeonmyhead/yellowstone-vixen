@@ -170,6 +170,8 @@ message JupiterProgramIxProto {
 message PumpfunProgramIxProto {
     oneof ix_oneof {
       PumpfunBuyInstructionProto buy = 1;
+      PumpfunCreateEventProto create_event = 2;
+      PumpfunTradeEventProto trade_event = 3;
     }
 }
 
