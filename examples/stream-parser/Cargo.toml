@@ -19,7 +19,8 @@ yellowstone-vixen-parser = { workspace = true, features = [
   "orca",
   "raydium",
   "jupiter",
-  "raydium_amm"
+  "raydium_amm",
+  "pumpfun",
 ] }
 
 [build-dependencies]

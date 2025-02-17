@@ -3435,6 +3435,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "pumpfun-program-sdk"
+version = "0.0.0"
+dependencies = [
+ "anchor-lang",
+ "assert_matches",
+ "borsh 0.10.4",
+ "borsh-derive 0.10.4",
+ "kaigan",
+ "num-derive 0.3.3",
+ "num-traits",
+ "serde",
+ "serde_with",
+ "solana-program 2.1.13",
+ "solana-sdk",
+ "thiserror 1.0.65",
+]
+
+[[package]]
 name = "qstring"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7176,6 +7194,7 @@ dependencies = [
  "bs58 0.5.1",
  "jupiter-program-sdk",
  "orca_whirlpools_client",
+ "pumpfun-program-sdk",
  "raydium-amm-program-sdk",
  "solana-program 2.1.13",
  "spl-pod",

@@ -13,11 +13,9 @@ use clap::Parser as _;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use yellowstone_vixen::{self as vixen, proto::parser, vixen_core::proto::Proto};
 use yellowstone_vixen_parser::{
-    jupiter::{
-        AccountParser as JupiterAccParser, InstructionParser as JupiterIxParser,
-        TransactionParser as JupiterProgramTxParser,
-    },
+    jupiter::{AccountParser as JupiterAccParser, InstructionParser as JupiterIxParser},
     orca::{AccountParser as OrcaAccParser, InstructionParser as OrcaIxParser},
+    pumpfun::{AccountParser as PumpfunAccParser, InstructionParser as PumpfunIxParser},
     raydium::{AccountParser as RaydiumAccParser, InstructionParser as RaydiumIxParser},
     raydium_amm::{AccountParser as RaydiumAmmAccParser, InstructionParser as RaydiumAmmIxParser},
     token_extension_program::{
@@ -48,12 +46,13 @@ fn main() {
     let config = toml::from_str(&config).expect("Error parsing config");
 
     let transaction_parser = TransactionParser::builder()
-        .instruction(RaydiumIxParser)
-        .instruction(JupiterIxParser)
         .instruction(TokenProgramIxParser)
         .instruction(TokenExtensionProgramIxParser)
+        .instruction(RaydiumIxParser)
+        .instruction(JupiterIxParser)
         .instruction(OrcaIxParser)
         .instruction(RaydiumAmmIxParser)
+        .instruction(PumpfunIxParser)
         .build();
     vixen::stream::Server::builder()
         .descriptor_set(parser::DESCRIPTOR_SET)

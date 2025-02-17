@@ -1,11 +1,13 @@
 use crate::jupiter::JupiterProgramIx;
 use crate::orca::OrcaProgramIx;
+use crate::pumpfun::PumpfunProgramIx;
 use crate::raydium::RaydiumProgramIx;
 use crate::raydium_amm::RaydiumAmmProgramIx;
 use crate::token_extension_program::TokenExtensionProgramIx;
 use crate::token_program::TokenProgramIx;
 use solana_program::{pubkey, pubkey::Pubkey};
-use yellowstone_vixen_core::{instruction::InstructionUpdate, Parser};
+use yellowstone_grpc_proto::prelude::TokenBalance;
+use yellowstone_vixen_core::{instruction::InstructionUpdate, Parser, ProgramParser};
 
 #[cfg(feature = "proto")]
 use yellowstone_vixen_proto::parser::{instruction_proto::IxOneof, InstructionProto};
@@ -51,9 +53,12 @@ define_instruction_variants!(
     ),
     (Orca, OrcaProgramIx, OrcaProgramIx),
     (RaydiumAmm, RaydiumAmmProgramIx, RaydiumAmmProgramIx),
+    (Pumpfun, PumpfunProgramIx, PumpfunProgramIx),
 );
 
 pub trait InstructionParser: Send + Sync + std::fmt::Debug {
+    fn program_id(&self) -> yellowstone_vixen_core::Pubkey;
+
     fn parse_instruction<'a>(
         &'a self,
         input: &'a InstructionUpdate,
@@ -69,9 +74,13 @@ pub trait InstructionParser: Send + Sync + std::fmt::Debug {
 
 impl<T> InstructionParser for T
 where
-    T: Parser<Input = InstructionUpdate> + Send + Sync + std::fmt::Debug,
+    T: Parser<Input = InstructionUpdate> + ProgramParser + Send + Sync + std::fmt::Debug,
     T::Output: Into<TransactionInstruction>,
 {
+    fn program_id(&self) -> yellowstone_vixen_core::Pubkey {
+        ProgramParser::program_id(self)
+    }
+
     fn parse_instruction<'a>(
         &'a self,
         input: &'a InstructionUpdate,
@@ -112,7 +121,12 @@ impl TransactionParserBuilder {
 
     pub fn instruction<T>(mut self, parser: T) -> Self
     where
-        T: Parser<Input = InstructionUpdate> + Send + Sync + std::fmt::Debug + 'static,
+        T: Parser<Input = InstructionUpdate>
+            + ProgramParser
+            + Send
+            + Sync
+            + std::fmt::Debug
+            + 'static,
         T::Output: Into<TransactionInstruction>,
     {
         self.instruction_parsers.push(Box::new(parser));
@@ -131,8 +145,16 @@ pub struct TransactionOutput {
     pub slot: u64,
     pub signature: Vec<u8>,
     pub instructions: Vec<Box<TransactionInstruction>>,
+    pub pre_balances: Vec<u64>,
+    pub post_balances: Vec<u64>,
+    pub pre_token_balances: Vec<TokenBalance>,
+    pub post_token_balances: Vec<TokenBalance>,
 }
 
+pub const EXCLUDED_PROGRAM_IDS: &[Pubkey] = &[
+    pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+    pubkey!("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"),
+];
 pub const ID: Pubkey = pubkey!("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8");
 
 impl yellowstone_vixen_core::Parser for TransactionParser {
@@ -144,8 +166,15 @@ impl yellowstone_vixen_core::Parser for TransactionParser {
     }
 
     fn prefilter(&self) -> yellowstone_vixen_core::Prefilter {
+        let program_ids: Vec<yellowstone_vixen_core::Pubkey> = self
+            .instruction_parsers
+            .iter()
+            .map(|parser| parser.program_id())
+            .filter(|id| !EXCLUDED_PROGRAM_IDS.contains(&id.into_bytes().into()))
+            .collect();
+
         yellowstone_vixen_core::Prefilter::builder()
-            .transaction_accounts([ID])
+            .transaction_accounts(program_ids)
             .build()
             .unwrap()
     }
@@ -163,10 +192,47 @@ impl yellowstone_vixen_core::Parser for TransactionParser {
                 }
             }
         }
+
         Ok(TransactionOutput {
             slot: tx_update.slot,
             signature: tx_update.transaction.as_ref().unwrap().signature.clone(),
             instructions,
+            pre_balances: tx_update
+                .transaction
+                .as_ref()
+                .unwrap()
+                .meta
+                .as_ref()
+                .unwrap()
+                .post_balances
+                .clone(),
+            post_balances: tx_update
+                .transaction
+                .as_ref()
+                .unwrap()
+                .meta
+                .as_ref()
+                .unwrap()
+                .pre_balances
+                .clone(),
+            pre_token_balances: tx_update
+                .transaction
+                .as_ref()
+                .unwrap()
+                .meta
+                .as_ref()
+                .unwrap()
+                .pre_token_balances
+                .clone(),
+            post_token_balances: tx_update
+                .transaction
+                .as_ref()
+                .unwrap()
+                .meta
+                .as_ref()
+                .unwrap()
+                .post_token_balances
+                .clone(),
         })
     }
 }
@@ -180,8 +246,11 @@ impl yellowstone_vixen_core::ProgramParser for TransactionParser {
 
 #[cfg(feature = "proto")]
 mod proto_parser {
+    use yellowstone_grpc_proto::prelude::{TokenBalance, UiTokenAmount};
     use yellowstone_vixen_core::proto::ParseProto;
-    use yellowstone_vixen_proto::parser::TransactionOutputProto;
+    use yellowstone_vixen_proto::parser::{
+        TokenBalanceProto, TransactionOutputProto, UiTokenAmountProto,
+    };
 
     use super::{TransactionInstruction, TransactionOutput, TransactionParser};
     use crate::helpers::IntoProto;
@@ -196,6 +265,41 @@ mod proto_parser {
                     .into_iter()
                     .map(IntoProto::into_proto)
                     .collect(),
+                pre_balances: self.pre_balances.to_vec(),
+                post_balances: self.post_balances.to_vec(),
+                pre_token_balances: self
+                    .pre_token_balances
+                    .into_iter()
+                    .map(IntoProto::into_proto)
+                    .collect(),
+                post_token_balances: self
+                    .post_token_balances
+                    .into_iter()
+                    .map(IntoProto::into_proto)
+                    .collect(),
+            }
+        }
+    }
+
+    impl IntoProto<TokenBalanceProto> for TokenBalance {
+        fn into_proto(self) -> TokenBalanceProto {
+            TokenBalanceProto {
+                account_index: self.account_index,
+                mint: self.mint.to_string(),
+                ui_token_amount: self.ui_token_amount.and_then(|amt| Some(amt.into_proto())),
+                owner: self.owner.to_string(),
+                program_id: self.program_id.to_string(),
+            }
+        }
+    }
+
+    impl IntoProto<UiTokenAmountProto> for UiTokenAmount {
+        fn into_proto(self) -> UiTokenAmountProto {
+            UiTokenAmountProto {
+                ui_amount: self.ui_amount,
+                decimals: self.decimals,
+                amount: self.amount.to_string(),
+                ui_amount_string: self.ui_amount_string,
             }
         }
     }

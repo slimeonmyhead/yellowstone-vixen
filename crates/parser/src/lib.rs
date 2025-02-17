@@ -19,6 +19,8 @@ mod helpers;
 pub mod jupiter;
 #[cfg(feature = "orca")]
 pub mod orca;
+#[cfg(feature = "pumpfun")]
+pub mod pumpfun;
 #[cfg(feature = "raydium")]
 pub mod raydium;
 #[cfg(feature = "raydium_amm")]

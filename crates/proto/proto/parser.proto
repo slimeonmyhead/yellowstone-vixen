@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 package vixen.parser;
-import "google/protobuf/any.proto";
 
 import "solana-token/accounts.proto";
 import "solana-token/ixs.proto";
@@ -10,6 +9,7 @@ import "orca.proto";
 import "raydium.proto";
 import "jupiter.proto";
 import "raydium_amm.proto";
+import "pumpfun.proto";
 
 
 /// Token Program
@@ -166,11 +166,11 @@ message JupiterProgramIxProto {
     }
 }
 
-// Jupiter Program Transactions
-message JupiterProgramTxProto {
-  uint64 slot = 1;
-  string signature = 2;
-  repeated JupiterProgramIxProto instructions = 3;
+// Pumpfun Program Instructions
+message PumpfunProgramIxProto {
+    oneof ix_oneof {
+      PumpfunBuyInstructionProto buy = 1;
+    }
 }
 
 message InstructionProto {
@@ -181,6 +181,7 @@ message InstructionProto {
     TokenProgramIxProto token_program_ix = 4;
     TokenExtensionProgramIxProto token_extension_program_ix = 5;
     RaydiumAmmProgramIxProto raydium_amm_program_ix = 6;
+    PumpfunProgramIxProto pumpfun_program_ix = 7;
   }
 }
 
@@ -188,4 +189,23 @@ message TransactionOutputProto {
   uint64 slot = 1;
   string signature = 2;
   repeated InstructionProto instructions = 3;
+  repeated uint64 pre_balances = 4;
+  repeated uint64 post_balances = 5;
+  repeated TokenBalanceProto pre_token_balances = 6;
+  repeated TokenBalanceProto post_token_balances = 7;
+}
+
+message TokenBalanceProto {
+  uint32 account_index = 1;
+  string mint = 2;
+  UiTokenAmountProto ui_token_amount = 3;
+  string owner = 4;
+  string program_id = 5;
+}
+
+message UiTokenAmountProto {
+  double ui_amount = 1;
+  uint32 decimals = 2;
+  string amount = 3;
+  string ui_amount_string = 4;
 }

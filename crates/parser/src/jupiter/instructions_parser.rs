@@ -6,7 +6,6 @@
 //!
 
 use borsh::BorshDeserialize;
-use bs58;
 use jupiter_program_sdk::instructions::{
     Claim as ClaimIxAccounts, ClaimInstructionArgs as ClaimIxData,
     ClaimToken as ClaimTokenIxAccounts, ClaimTokenInstructionArgs as ClaimTokenIxData,
@@ -60,12 +59,6 @@ pub enum JupiterProgramIx {
     SwapEvent(SwapEvent),
     FeeEvent(FeeEvent),
 }
-#[derive(Debug)]
-pub struct JupiterProgramTx {
-    pub slot: u64,
-    pub signature: Vec<u8>,
-    pub instructions: Vec<JupiterProgramIx>,
-}
 
 #[derive(Debug, Copy, Clone)]
 pub struct InstructionParser;
@@ -97,54 +90,7 @@ impl yellowstone_vixen_core::Parser for InstructionParser {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
-pub struct TransactionParser;
-
-impl yellowstone_vixen_core::Parser for TransactionParser {
-    type Input = yellowstone_vixen_core::TransactionUpdate;
-    type Output = JupiterProgramTx;
-
-    fn id(&self) -> std::borrow::Cow<str> {
-        "Jupiter::InstructionParser".into()
-    }
-
-    fn prefilter(&self) -> yellowstone_vixen_core::Prefilter {
-        yellowstone_vixen_core::Prefilter::builder()
-            .transaction_accounts([ID])
-            .build()
-            .unwrap()
-    }
-
-    async fn parse(
-        &self,
-        tx_update: &yellowstone_vixen_core::TransactionUpdate,
-    ) -> yellowstone_vixen_core::ParseResult<Self::Output> {
-        let instructions = InstructionUpdate::parse_from_txn(tx_update).unwrap();
-        let mut ixs: Vec<JupiterProgramIx> = Vec::new();
-        for insn in instructions.iter().flat_map(|i| i.visit_all()) {
-            if insn.program.equals_ref(ID) {
-                match InstructionParser::parse_impl(&insn) {
-                    Ok(ix) => ixs.push(ix),
-                    Err(e) => continue,
-                }
-            }
-        }
-        Ok(JupiterProgramTx {
-            slot: tx_update.slot,
-            signature: tx_update.transaction.as_ref().unwrap().signature.clone(),
-            instructions: ixs,
-        })
-    }
-}
-
 impl yellowstone_vixen_core::ProgramParser for InstructionParser {
-    #[inline]
-    fn program_id(&self) -> yellowstone_vixen_core::Pubkey {
-        ID.to_bytes().into()
-    }
-}
-
-impl yellowstone_vixen_core::ProgramParser for TransactionParser {
     #[inline]
     fn program_id(&self) -> yellowstone_vixen_core::Pubkey {
         ID.to_bytes().into()
@@ -411,15 +357,12 @@ mod proto_parser {
     use jupiter_program_sdk::{types::RoutePlanStep, ID};
     use yellowstone_vixen_core::proto::ParseProto;
     use yellowstone_vixen_proto::parser::{
-        jupiter_program_ix_proto::IxOneof, JupiterProgramIxProto, JupiterProgramTxProto,
-        JupiterRouteAccountsProto, JupiterRouteInstructionProto, JupiterRouteIxDataProto,
-        JupiterRoutePlanStepProto, JupiterSwapEventProto,
+        jupiter_program_ix_proto::IxOneof, JupiterProgramIxProto, JupiterRouteAccountsProto,
+        JupiterRouteInstructionProto, JupiterRouteIxDataProto, JupiterRoutePlanStepProto,
+        JupiterSwapEventProto,
     };
 
-    use super::{
-        InstructionParser, JupiterProgramIx, JupiterProgramTx, RouteIxAccounts, RouteIxData,
-        SwapEvent, TransactionParser,
-    };
+    use super::{InstructionParser, JupiterProgramIx, RouteIxAccounts, RouteIxData, SwapEvent};
     use crate::helpers::IntoProto;
 
     impl IntoProto<JupiterRouteAccountsProto> for RouteIxAccounts {
@@ -495,28 +438,6 @@ mod proto_parser {
 
     impl ParseProto for InstructionParser {
         type Message = JupiterProgramIxProto;
-
-        fn output_into_message(value: Self::Output) -> Self::Message {
-            value.into_proto()
-        }
-    }
-
-    impl IntoProto<JupiterProgramTxProto> for JupiterProgramTx {
-        fn into_proto(self) -> JupiterProgramTxProto {
-            JupiterProgramTxProto {
-                slot: self.slot,
-                signature: bs58::encode(&self.signature).into_string(),
-                instructions: self
-                    .instructions
-                    .into_iter()
-                    .map(IntoProto::into_proto)
-                    .collect(),
-            }
-        }
-    }
-
-    impl ParseProto for TransactionParser {
-        type Message = JupiterProgramTxProto;
 
         fn output_into_message(value: Self::Output) -> Self::Message {
             value.into_proto()
