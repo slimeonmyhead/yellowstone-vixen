@@ -147,6 +147,7 @@ pub struct TransactionOutput {
     pub signer: Pubkey,
     pub timestamp: i64,
     pub instructions: Vec<Box<TransactionInstruction>>,
+    pub accounts: Vec<Pubkey>,
     pub pre_balances: Vec<u64>,
     pub post_balances: Vec<u64>,
     pub pre_token_balances: Vec<TokenBalance>,
@@ -195,7 +196,7 @@ impl yellowstone_vixen_core::Parser for TransactionParser {
             }
         }
 
-        let accounts = tx_update
+        let message = tx_update
             .transaction
             .as_ref()
             .unwrap()
@@ -204,9 +205,14 @@ impl yellowstone_vixen_core::Parser for TransactionParser {
             .unwrap()
             .message
             .as_ref()
-            .unwrap()
+            .unwrap();
+
+        let accounts: Vec<Pubkey> = message
             .account_keys
-            .clone();
+            .clone()
+            .into_iter()
+            .map(|a| Pubkey::new_from_array(a.as_slice().try_into().unwrap_or([0; 32])))
+            .collect();
 
         let meta = tx_update
             .transaction
@@ -219,19 +225,13 @@ impl yellowstone_vixen_core::Parser for TransactionParser {
         Ok(TransactionOutput {
             slot: tx_update.slot,
             signature: tx_update.transaction.as_ref().unwrap().signature.clone(),
-            signer: Pubkey::new_from_array(
-                accounts
-                    .get(0)
-                    .unwrap()
-                    .as_slice()
-                    .try_into()
-                    .unwrap_or([0; 32]),
-            ),
+            signer: *accounts.get(0).unwrap_or(&Pubkey::new_from_array([0; 32])),
             timestamp: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
                 .as_secs() as i64,
             instructions,
+            accounts: accounts.clone(),
             pre_balances: meta.post_balances.clone(),
             post_balances: meta.pre_balances.clone(),
             pre_token_balances: meta.pre_token_balances.clone(),
@@ -270,6 +270,7 @@ mod proto_parser {
                     .into_iter()
                     .map(IntoProto::into_proto)
                     .collect(),
+                accounts: self.accounts.iter().map(|a| a.to_string()).collect(),
                 pre_balances: self.pre_balances.to_vec(),
                 post_balances: self.post_balances.to_vec(),
                 pre_token_balances: self

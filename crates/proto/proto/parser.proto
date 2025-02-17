@@ -194,10 +194,11 @@ message TransactionOutputProto {
   string signer = 3;
   int64 timestamp = 4;
   repeated InstructionProto instructions = 5;
-  repeated uint64 pre_balances = 6;
-  repeated uint64 post_balances = 7;
-  repeated TokenBalanceProto pre_token_balances = 8;
-  repeated TokenBalanceProto post_token_balances = 9;
+  repeated string accounts = 6;
+  repeated uint64 pre_balances = 7;
+  repeated uint64 post_balances = 8;
+  repeated TokenBalanceProto pre_token_balances = 9;
+  repeated TokenBalanceProto post_token_balances = 10;
 }
 
 message TokenBalanceProto {

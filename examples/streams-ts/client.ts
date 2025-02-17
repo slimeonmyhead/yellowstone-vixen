@@ -19,12 +19,12 @@ function main() {
   );
 
   let stream = client.Subscribe({
-    program: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    program: "Transaction11111111111111111111111111111111",
   });
 
   stream.on("data", function (update: any) {
     let decoded = decodeVixenParserHelper(update.parsed!);
-    console.log(`decoded = ${JSON.stringify(decoded)}`);
+    console.log(`${JSON.stringify(decoded)}`);
   });
 
   stream.on("end", () => console.log("end"));
