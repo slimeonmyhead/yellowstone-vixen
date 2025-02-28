@@ -141,6 +141,7 @@ message RaydiumProgramIxProto {
 message RaydiumAmmProgramIxProto {
   oneof ix_oneof {
     RaydiumAmmSwapBaseInInstructionProto swapBaseIn = 1;
+    RaydiumAmmSwapBaseOutInstructionProto swapBaseOut = 2;
   }
 }
 

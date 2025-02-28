@@ -477,10 +477,14 @@ mod proto_parser {
     use yellowstone_vixen_proto::parser::{
         raydium_amm_program_ix_proto::IxOneof, RaydiumAmmProgramIxProto,
         RaydiumAmmSwapBaseInAccountsProto, RaydiumAmmSwapBaseInInstructionProto,
-        RaydiumAmmSwapBaseInIxDataProto,
+        RaydiumAmmSwapBaseInIxDataProto, RaydiumAmmSwapBaseOutAccountsProto,
+        RaydiumAmmSwapBaseOutInstructionProto, RaydiumAmmSwapBaseOutIxDataProto,
     };
 
-    use super::{InstructionParser, RaydiumAmmProgramIx, SwapBaseInIxAccounts, SwapBaseInIxData};
+    use super::{
+        InstructionParser, RaydiumAmmProgramIx, SwapBaseInIxAccounts, SwapBaseInIxData,
+        SwapBaseOutIxAccounts, SwapBaseOutIxData,
+    };
     use crate::helpers::IntoProto;
 
     impl ParseProto for InstructionParser {
@@ -525,6 +529,39 @@ mod proto_parser {
         }
     }
 
+    impl IntoProto<RaydiumAmmSwapBaseOutIxDataProto> for SwapBaseOutIxData {
+        fn into_proto(self) -> RaydiumAmmSwapBaseOutIxDataProto {
+            RaydiumAmmSwapBaseOutIxDataProto {
+                max_amount_in: self.max_amount_in,
+                amount_out: self.amount_out,
+            }
+        }
+    }
+    impl IntoProto<RaydiumAmmSwapBaseOutAccountsProto> for SwapBaseOutIxAccounts {
+        fn into_proto(self) -> RaydiumAmmSwapBaseOutAccountsProto {
+            RaydiumAmmSwapBaseOutAccountsProto {
+                token_program: self.token_program.to_string(),
+                amm: self.amm.to_string(),
+                amm_authority: self.amm_authority.to_string(),
+                amm_open_orders: self.amm_open_orders.to_string(),
+                amm_target_orders: self.amm_target_orders.unwrap_or(ID).to_string(),
+                pool_coin_token_account: self.pool_coin_token_account.to_string(),
+                pool_pc_token_account: self.pool_pc_token_account.to_string(),
+                serum_program: self.serum_program.to_string(),
+                serum_market: self.serum_market.to_string(),
+                serum_bids: self.serum_bids.to_string(),
+                serum_asks: self.serum_asks.to_string(),
+                serum_event_queue: self.serum_event_queue.to_string(),
+                serum_coin_vault_account: self.serum_coin_vault_account.to_string(),
+                serum_pc_vault_account: self.serum_pc_vault_account.to_string(),
+                serum_vault_signer: self.serum_vault_signer.to_string(),
+                user_source_token_account: self.user_source_token_account.to_string(),
+                user_destination_token_account: self.user_destination_token_account.to_string(),
+                user_source_owner: self.user_source_owner.to_string(),
+            }
+        }
+    }
+
     impl IntoProto<RaydiumAmmProgramIxProto> for RaydiumAmmProgramIx {
         fn into_proto(self) -> RaydiumAmmProgramIxProto {
             match self {
@@ -533,6 +570,14 @@ mod proto_parser {
                         accounts: Some(accounts.into_proto()),
                         data: Some(data.into_proto()),
                     })),
+                },
+                RaydiumAmmProgramIx::SwapBaseOut(accounts, data) => RaydiumAmmProgramIxProto {
+                    ix_oneof: Some(IxOneof::SwapBaseOut(
+                        RaydiumAmmSwapBaseOutInstructionProto {
+                            accounts: Some(accounts.into_proto()),
+                            data: Some(data.into_proto()),
+                        },
+                    )),
                 },
                 //Ingore others
                 _ => RaydiumAmmProgramIxProto { ix_oneof: None },

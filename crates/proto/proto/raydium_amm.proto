@@ -34,6 +34,38 @@ message RaydiumAmmSwapBaseInInstructionProto {
     RaydiumAmmSwapBaseInIxDataProto data = 2;
 }
 
+message RaydiumAmmSwapBaseOutAccountsProto {
+    string token_program = 1;
+    string amm = 2;
+    string amm_authority = 3;
+    string amm_open_orders = 4;
+    string amm_target_orders = 5;
+    string pool_coin_token_account = 6;
+    string pool_pc_token_account = 7;
+    string serum_program = 8;
+    string serum_market = 9;
+    string serum_bids = 10;
+    string serum_asks = 11;
+    string serum_event_queue = 12;
+    string serum_coin_vault_account = 13;
+    string serum_pc_vault_account = 14;
+    string serum_vault_signer = 15;
+    string user_source_token_account = 16;
+    string user_destination_token_account = 17;
+    string user_source_owner = 18;
+}
+
+message RaydiumAmmSwapBaseOutIxDataProto {
+    uint64 max_amount_in = 1;
+    uint64 amount_out = 2;
+}
+
+
+message RaydiumAmmSwapBaseOutInstructionProto {
+    RaydiumAmmSwapBaseOutAccountsProto accounts = 1;
+    RaydiumAmmSwapBaseOutIxDataProto data = 2;
+}
+
 
 message TargetOrdersProto {
     bytes discriminator = 1;
